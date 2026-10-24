@@ -392,13 +392,13 @@ class ImCamRtcMedia:
                 "quality": self.quality(serial),
             }
             async with asyncio.timeout(65):
-                response = await self.coordinator.api.http.post(
+                async with self.coordinator.api.http.post(
                     f"{base_url}/v1/streams",
                     json=body,
                     headers={"Authorization": f"Bearer {api_key}"},
-                )
-                response.raise_for_status()
-                result = await response.json()
+                ) as response:
+                    response.raise_for_status()
+                    result = await response.json()
             token = result.get("id") if isinstance(result, dict) else None
             if not isinstance(token, str) or not re.fullmatch(r"[A-Za-z0-9_-]{32,}", token):
                 raise HomeAssistantError("The IM CAM Transcoder returned an invalid stream reference.")
@@ -416,11 +416,12 @@ class ImCamRtcMedia:
             return
         try:
             async with asyncio.timeout(5):
-                response = await self.coordinator.api.http.delete(
+                async with self.coordinator.api.http.delete(
                     f"{self.coordinator.transcoder_url}/v1/streams/{token}",
                     headers={"Authorization": f"Bearer {self.coordinator.transcoder_api_key}"},
-                )
-                response.raise_for_status()
+                ) as response:
+                    response.raise_for_status()
+                    await response.read()
         except Exception:
             # The sidecar also expires streams after playlist requests stop.
             pass
@@ -437,12 +438,13 @@ class ImCamRtcMedia:
         if token and self.coordinator.transcoder_api_key:
             try:
                 async with asyncio.timeout(5):
-                    response = await self.coordinator.api.http.post(
+                    async with self.coordinator.api.http.post(
                         f"{self.coordinator.transcoder_url}/v1/streams/{token}/quality",
                         json={"quality": value},
                         headers={"Authorization": f"Bearer {self.coordinator.transcoder_api_key}"},
-                    )
-                    response.raise_for_status()
+                    ) as response:
+                        response.raise_for_status()
+                        await response.read()
             except Exception as err:
                 raise HomeAssistantError("Unable to change transcoded camera quality") from err
 
