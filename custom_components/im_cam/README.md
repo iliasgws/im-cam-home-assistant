@@ -23,9 +23,11 @@ Your account password is stored in the Home Assistant config entry and hashed in
 
 The optional **IM CAM Transcoder** app creates a second camera entity and converts the camera's H.265 video to H.264 on the Home Assistant host. This uses software encoding and can increase CPU load. It outputs video only; the original **Camera** entity remains available for direct WebRTC playback with camera audio.
 
-1. In **Settings → Apps**, open the three-dot menu, choose **Repositories**, and add `https://github.com/iliasgws/im-cam-home-assistant`.
+To try beta **0.4.0-beta.1**, install that prerelease of the integration through HACS and add the feature branch as the Apps repository. The branch-specific app hostname is `d4719374-imcam-transcoder`.
+
+1. In **Settings → Apps**, open the three-dot menu, choose **Repositories**, and add `https://github.com/iliasgws/im-cam-home-assistant#feat/server-side-transcoding`.
 2. Install **IM CAM Transcoder**. In its configuration, set a random API key of at least 32 characters.
-3. In the IM CAM integration's options, enable **Server transcoding**, keep the default internal app URL unless you installed from a fork, and enter the same API key.
+3. In the IM CAM integration's options, enable **Server transcoding**, set the app URL to `http://d4719374-imcam-transcoder:8787`, and enter the same API key.
 4. Reload the integration and use the new **Server transcoded camera** entity.
 
 The app serves H.264 HLS at 640×360 for SD or 1280×720 for HD, both at up to 15 fps. HD means 720p output. The server allows two concurrent camera pipelines and stops a stream after it becomes idle. The transcoded HLS path has more latency than direct WebRTC.
