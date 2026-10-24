@@ -2,7 +2,9 @@
 
 [![Open your Home Assistant instance and open IM CAM in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=iliasgws&repository=im-cam-home-assistant&category=integration)
 
-This standalone integration connects directly to IM CAM with your account and password. It adds camera controls and a native WebRTC live-view path without the IM-CAM CLI, Java, or GStreamer. Live video/audio support is experimental and requires compatible browser codecs.
+<p align="center"><img src="https://raw.githubusercontent.com/iliasgws/im-cam-home-assistant/main/custom_components/im_cam/brand/icon@2x.png" width="128" alt="IM CAM"></p>
+
+This standalone integration connects directly to IM CAM with your account and password. It adds camera controls and a native WebRTC live-view path without the IM-CAM CLI, Java, or GStreamer. Live video/audio support is experimental and requires compatible browser codecs. The integration ships its own icon and logo; Home Assistant 2026.3 and later display them from the bundled `brand/` images.
 
 ## Requirements
 
@@ -20,13 +22,13 @@ Your account password is stored in the Home Assistant config entry and hashed in
 ## Update an existing installation
 
 1. Open **IM CAM** in HACS and choose **Update information** from its menu.
-2. Install version **0.3.0** or newer. If HACS does not offer an update for an earlier commit-based installation, choose **Redownload**, select **0.3.0**, and download it.
+2. Install version **0.3.1** or newer. If HACS does not offer an update for an earlier commit-based installation, choose **Redownload**, select **0.3.1**, and download it.
 3. Close any open IM CAM setup dialog and **restart Home Assistant itself**. Reloading the integration or refreshing the browser does not replace its loaded Python config flow.
 4. Open IM CAM setup again. It should ask only for **Account** and **Password**.
 
 Existing IM CAM config entries can stay in place; their account and password still work with the bundled client profile. You do not need to delete your devices or entities to update.
 
-If the old seven-field form remains after a restart, check that HACS lists **iliasgws/im-cam-home-assistant**. In Home Assistant's file editor, `custom_components/im_cam/manifest.json` should show version `0.3.0`, and `config_flow.py` should have only `CONF_ACCOUNT` and `CONF_PASSWORD` in its form schema. This distinguishes an old download from code still loaded in memory.
+If the old seven-field form remains after a restart, check that HACS lists **iliasgws/im-cam-home-assistant**. In Home Assistant's file editor, `custom_components/im_cam/manifest.json` should show version `0.3.1`, and `config_flow.py` should have only `CONF_ACCOUNT` and `CONF_PASSWORD` in its form schema. This distinguishes an old download from code still loaded in memory.
 
 ## Entities
 
