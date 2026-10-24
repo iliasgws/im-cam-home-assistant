@@ -22,13 +22,13 @@ Your account password is stored in the Home Assistant config entry and hashed in
 ## Update an existing installation
 
 1. Open **IM CAM** in HACS and choose **Update information** from its menu.
-2. Install version **0.3.1** or newer. If HACS does not offer an update for an earlier commit-based installation, choose **Redownload**, select **0.3.1**, and download it.
+2. Install version **0.3.2** or newer. If HACS does not offer an update for an earlier commit-based installation, choose **Redownload**, select **0.3.2**, and download it.
 3. Close any open IM CAM setup dialog and **restart Home Assistant itself**. Reloading the integration or refreshing the browser does not replace its loaded Python config flow.
 4. Open IM CAM setup again. It should ask only for **Account** and **Password**.
 
 Existing IM CAM config entries can stay in place; their account and password still work with the bundled client profile. You do not need to delete your devices or entities to update.
 
-If the old seven-field form remains after a restart, check that HACS lists **iliasgws/im-cam-home-assistant**. In Home Assistant's file editor, `custom_components/im_cam/manifest.json` should show version `0.3.1`, and `config_flow.py` should have only `CONF_ACCOUNT` and `CONF_PASSWORD` in its form schema. This distinguishes an old download from code still loaded in memory.
+If the old seven-field form remains after a restart, check that HACS lists **iliasgws/im-cam-home-assistant**. In Home Assistant's file editor, `custom_components/im_cam/manifest.json` should show version `0.3.2`, and `config_flow.py` should have only `CONF_ACCOUNT` and `CONF_PASSWORD` in its form schema. This distinguishes an old download from code still loaded in memory.
 
 ## Entities
 
