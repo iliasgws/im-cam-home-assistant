@@ -7,16 +7,15 @@ This custom integration connects directly to the IM CAM control service and crea
 ## Requirements
 
 - Home Assistant Core with custom integrations enabled.
-- The authorized service registration values (`vid`, `vkey`, `oemVid`, `bundleId`, `appVersion`) for your IM CAM client profile.
 - The account must have linked cameras.
 
 ## Install
 
-Copy this `im_cam` directory to `<config>/custom_components/im_cam/`, restart Home Assistant, then add **IM CAM** under Settings → Devices & services. Enter the account, password, and the five service registration values. The integration polls every two minutes.
+Install with the **Open in HACS** badge above, then add **IM CAM** under Settings → Devices & services. Enter your IM CAM account and password; client registration is bundled with the integration. The integration polls every two minutes.
 
 Once this repository is published on GitHub, it can be installed through HACS using the one-click **Open in HACS** link. HACS does not support installing custom repositories hosted on GitLab.
 
-The account password and service registration values are stored in the Home Assistant config entry. The password is only hashed in memory when constructing the login request. Keep a backup of the Home Assistant configuration private.
+Your account password is stored in the Home Assistant config entry and hashed in memory when constructing the login request. The client registration profile is shared by users of this integration. Keep a backup of the Home Assistant configuration private.
 
 ## Entities
 

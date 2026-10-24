@@ -18,15 +18,11 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .const import (
     CONF_ACCOUNT,
-    CONF_APP_VERSION,
-    CONF_BUNDLE_ID,
-    CONF_OEM_VID,
     CONF_PASSWORD,
-    CONF_VID,
-    CONF_VKEY,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
 )
+from .client_profile import APP_VERSION, BUNDLE_ID, OEM_VID, VID, VKEY
 
 PLATFORMS = ["sensor"]
 _LOGGER = logging.getLogger(__name__)
@@ -125,14 +121,14 @@ class ImCamCoordinator(DataUpdateCoordinator):
                     "service_type": 0,
                     "device_token": "",
                     "sys_version": platform.release(),
-                    "bundle_id": data[CONF_BUNDLE_ID],
+                    "bundle_id": BUNDLE_ID,
                     "model": "Home Assistant",
                     "net": 1,
                     "os": 2,
-                    "version": data[CONF_APP_VERSION],
-                    "vid": data[CONF_VID],
-                    "vkey": data[CONF_VKEY],
-                    "oem_vid": data[CONF_OEM_VID],
+                    "version": APP_VERSION,
+                    "vid": VID,
+                    "vkey": VKEY,
+                    "oem_vid": OEM_VID,
                     "udid": "",
                 },
                 1,

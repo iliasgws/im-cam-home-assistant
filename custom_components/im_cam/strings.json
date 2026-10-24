@@ -3,15 +3,10 @@
     "step": {
       "user": {
         "title": "Connect to IM CAM",
-        "description": "Enter your IM CAM account and the authorized client registration values.",
+        "description": "Enter your IM CAM account login. Client registration is included with this integration.",
         "data": {
           "account": "Account",
-          "password": "Password",
-          "vid": "Client VID",
-          "vkey": "Client VKEY",
-          "oem_vid": "OEM VID",
-          "bundle_id": "Bundle ID",
-          "app_version": "Client app version"
+          "password": "Password"
         }
       }
     }

@@ -4,7 +4,7 @@ from homeassistant import config_entries
 from homeassistant.data_entry_flow import FlowResult
 import voluptuous as vol
 
-from .const import CONF_ACCOUNT, CONF_APP_VERSION, CONF_BUNDLE_ID, CONF_OEM_VID, CONF_PASSWORD, CONF_VID, CONF_VKEY, DOMAIN
+from .const import CONF_ACCOUNT, CONF_PASSWORD, DOMAIN
 
 
 class ImCamConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -21,11 +21,6 @@ class ImCamConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             {
                 vol.Required(CONF_ACCOUNT): str,
                 vol.Required(CONF_PASSWORD): str,
-                vol.Required(CONF_VID): str,
-                vol.Required(CONF_VKEY): str,
-                vol.Required(CONF_OEM_VID): str,
-                vol.Required(CONF_BUNDLE_ID): str,
-                vol.Required(CONF_APP_VERSION): str,
             }
         )
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
