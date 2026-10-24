@@ -1,6 +1,6 @@
 # IM CAM for Home Assistant
 
-[![Open your Home Assistant instance and open IM CAM in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=pilmomo&repository=im-cam-home-assistant&category=integration)
+[![Open your Home Assistant instance and open IM CAM in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=iliasgws&repository=im-cam-home-assistant&category=integration)
 
 This custom integration connects directly to the IM CAM control service and creates one connection sensor per linked camera. It currently reports `online`, `offline`, or `unknown`; video streaming and camera controls are not exposed in Home Assistant yet. It does not require the IM-CAM CLI, Java, or a local client profile file.
 

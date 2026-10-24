@@ -3,8 +3,8 @@
   "name": "IM CAM",
   "codeowners": ["@pilmomo1"],
   "config_flow": true,
-  "documentation": "https://github.com/pilmomo/im-cam-home-assistant",
-  "issue_tracker": "https://github.com/pilmomo/im-cam-home-assistant/issues",
+  "documentation": "https://github.com/iliasgws/im-cam-home-assistant",
+  "issue_tracker": "https://github.com/iliasgws/im-cam-home-assistant/issues",
   "iot_class": "cloud_polling",
   "version": "0.1.0"
 }
