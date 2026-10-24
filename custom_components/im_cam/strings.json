@@ -10,5 +10,22 @@
         }
       }
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Server transcoding",
+        "description": "Install the IM CAM Transcoder app, set a random API key of at least 32 characters in its options, then enter the same key here. The additional camera converts video to H.264 on the Home Assistant host.",
+        "data": {
+          "enable_server_transcoding": "Enable the server transcoded camera",
+          "transcoder_url": "Transcoder app URL",
+          "transcoder_api_key": "Transcoder API key"
+        }
+      }
+    },
+    "error": {
+      "invalid_transcoder_url": "Enter the app's internal HTTP or HTTPS URL.",
+      "api_key_too_short": "Enter the same API key configured in the app (at least 32 characters)."
+    }
   }
 }

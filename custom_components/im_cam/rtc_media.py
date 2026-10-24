@@ -8,6 +8,7 @@ import base64
 import asyncio
 import uuid
 import time
+import re
 from collections.abc import Mapping
 from contextlib import AsyncExitStack, suppress
 from typing import Any
@@ -203,6 +204,7 @@ class ImCamRtcMedia:
         self._quality: dict[str, str] = {}
         self._ice_servers: list[RTCIceServer] = []
         self._cleanup_tasks: set[asyncio.Task] = set()
+        self._transcoded_tokens: dict[str, str] = {}
         self._configuration_lock = asyncio.Lock()
         self._ice_refresh_at = 0.0
 
@@ -359,8 +361,69 @@ class ImCamRtcMedia:
         """Close this entry's media sessions and await pending socket cleanup."""
         for session_id in tuple(self._sessions):
             await self.async_close_session(session_id)
+        await asyncio.gather(
+            *(self.async_close_transcoded_stream(serial) for serial in tuple(self._transcoded_tokens)),
+            return_exceptions=True,
+        )
         if self._cleanup_tasks:
             await asyncio.gather(*tuple(self._cleanup_tasks), return_exceptions=True)
+
+    async def async_create_transcoded_stream(self, serial):
+        """Start or reuse a server HLS session for a camera and return its source URL."""
+        base_url = self.coordinator.transcoder_url
+        api_key = self.coordinator.transcoder_api_key
+        if not api_key:
+            raise HomeAssistantError(
+                "Set an API key for the IM CAM Transcoder app in the integration options."
+            )
+        try:
+            async with self.coordinator.async_control_session() as control:
+                wss, access, secret, account_sid, permits = await self._bootstrap(control)
+            permit = permits.get(serial)
+            if not permit:
+                raise HomeAssistantError("Camera authorization for server transcoding is unavailable.")
+            body = {
+                "wss": wss,
+                "accessId": access,
+                "secret": secret,
+                "sessionId": account_sid,
+                "serial": serial,
+                "permitCode": permit,
+                "quality": self.quality(serial),
+            }
+            async with asyncio.timeout(65):
+                response = await self.coordinator.api.http.post(
+                    f"{base_url}/v1/streams",
+                    json=body,
+                    headers={"Authorization": f"Bearer {api_key}"},
+                )
+                response.raise_for_status()
+                result = await response.json()
+            token = result.get("id") if isinstance(result, dict) else None
+            if not isinstance(token, str) or not re.fullmatch(r"[A-Za-z0-9_-]{32,}", token):
+                raise HomeAssistantError("The IM CAM Transcoder returned an invalid stream reference.")
+            self._transcoded_tokens[serial] = token
+            return f"{base_url}/hls/{token}/index.m3u8"
+        except HomeAssistantError:
+            raise
+        except Exception as err:
+            raise HomeAssistantError("Unable to start the IM CAM server transcoder.") from err
+
+    async def async_close_transcoded_stream(self, serial):
+        """Ask the companion app to stop one camera stream; idle cleanup is a fallback."""
+        token = self._transcoded_tokens.pop(serial, None)
+        if token is None or not self.coordinator.transcoder_api_key:
+            return
+        try:
+            async with asyncio.timeout(5):
+                response = await self.coordinator.api.http.delete(
+                    f"{self.coordinator.transcoder_url}/v1/streams/{token}",
+                    headers={"Authorization": f"Bearer {self.coordinator.transcoder_api_key}"},
+                )
+                response.raise_for_status()
+        except Exception:
+            # The sidecar also expires streams after playlist requests stop.
+            pass
 
     async def async_set_quality(self, serial, value):
         if value not in {"SD", "HD"}:
@@ -370,6 +433,18 @@ class ImCamRtcMedia:
             if session.serial == serial and session.ready:
                 await session.send("switchVideo", {"type": code, "act": 0})
         self._quality[serial] = value
+        token = self._transcoded_tokens.get(serial)
+        if token and self.coordinator.transcoder_api_key:
+            try:
+                async with asyncio.timeout(5):
+                    response = await self.coordinator.api.http.post(
+                        f"{self.coordinator.transcoder_url}/v1/streams/{token}/quality",
+                        json={"quality": value},
+                        headers={"Authorization": f"Bearer {self.coordinator.transcoder_api_key}"},
+                    )
+                    response.raise_for_status()
+            except Exception as err:
+                raise HomeAssistantError("Unable to change transcoded camera quality") from err
 
     def quality(self, serial):
         return self._quality.get(serial, "SD")
