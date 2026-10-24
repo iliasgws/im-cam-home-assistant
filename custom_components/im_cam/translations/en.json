@@ -1,0 +1,14 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to IM CAM",
+        "description": "Enter your IM CAM account login. Client registration is included with this integration.",
+        "data": {
+          "account": "Account",
+          "password": "Password"
+        }
+      }
+    }
+  }
+}
