@@ -1,10 +1,12 @@
 {
   "domain": "im_cam",
   "name": "IM CAM",
-  "codeowners": ["@iliasgws"],
+  "codeowners": [
+    "@iliasgws"
+  ],
   "config_flow": true,
   "documentation": "https://github.com/iliasgws/im-cam-home-assistant",
   "issue_tracker": "https://github.com/iliasgws/im-cam-home-assistant/issues",
   "iot_class": "cloud_polling",
-  "version": "0.2.0"
+  "version": "0.3.0"
 }
