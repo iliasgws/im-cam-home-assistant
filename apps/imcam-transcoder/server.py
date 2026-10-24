@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import hmac
 import json
+import logging
 import os
 import re
 import secrets
@@ -24,6 +25,7 @@ MAX_STREAMS = 2
 TOKEN_RE = re.compile(r"^[A-Za-z0-9_-]{32,}$")
 SEGMENT_RE = re.compile(r"^segment\d{5}\.ts$")
 ROOT = Path(tempfile.gettempdir()) / "imcam-hls"
+_LOGGER = logging.getLogger("imcam_transcoder")
 
 
 class TranscoderError(Exception):
@@ -37,6 +39,7 @@ class Stream:
     directory: Path
     process: asyncio.subprocess.Process
     last_access: float
+    log_task: asyncio.Task | None = None
 
 
 class Transcoder:
@@ -109,11 +112,12 @@ class Transcoder:
                     "python3", "/opt/imcam/imcam_live_gst.py",
                     stdin=asyncio.subprocess.PIPE,
                     stdout=asyncio.subprocess.DEVNULL,
-                    stderr=asyncio.subprocess.DEVNULL,
+                    stderr=asyncio.subprocess.PIPE,
                 )
+                log_task = asyncio.create_task(self._read_helper_logs(process.stderr))
                 process.stdin.write((json.dumps(body, separators=(",", ":")) + "\n").encode())
                 await process.stdin.drain()
-                stream = Stream(token, body["serial"], directory, process, time.monotonic())
+                stream = Stream(token, body["serial"], directory, process, time.monotonic(), log_task)
                 self.streams[token] = stream
                 self.serials[stream.serial] = token
 
@@ -177,7 +181,7 @@ class Transcoder:
                 expired = [token for token, stream in self.streams.items()
                            if stream.last_access < cutoff or stream.process.returncode is not None]
             for token in expired:
-                await self._discard(token)
+                await self._discard_if_idle(token, cutoff)
 
     async def _discard(self, token: str):
         async with self.lock:
@@ -186,6 +190,29 @@ class Transcoder:
                 self.serials.pop(stream.serial, None)
         if stream:
             await self._stop(stream)
+
+    async def _discard_if_idle(self, token: str, cutoff: float):
+        async with self.lock:
+            stream = self.streams.get(token)
+            if stream is None or (
+                stream.last_access >= cutoff and stream.process.returncode is None
+            ):
+                return
+            self.streams.pop(token, None)
+            if self.serials.get(stream.serial) == token:
+                self.serials.pop(stream.serial, None)
+        await self._stop(stream)
+
+    @staticmethod
+    async def _read_helper_logs(reader):
+        if reader is None:
+            return
+        while line := await reader.readline():
+            message = line.decode("utf-8", "replace").strip()
+            # The helper marks its sanitized status/error messages. Leave raw
+            # GStreamer diagnostics out of HA logs because they can include SDP.
+            if message.startswith("IMCAM: "):
+                _LOGGER.info("%s", message[7:500])
 
     @staticmethod
     async def _stop(stream: Stream):
@@ -199,6 +226,8 @@ class Transcoder:
             except TimeoutError:
                 process.kill()
                 await process.wait()
+        if stream.log_task:
+            await asyncio.gather(stream.log_task, return_exceptions=True)
         shutil.rmtree(stream.directory, ignore_errors=True)
 
 

@@ -25,7 +25,8 @@ class LiveViewError(Exception):
 
 
 def say(message):
-    print("".join(c if c.isprintable() else " " for c in str(message))[:500], file=sys.stderr, flush=True)
+    safe_message = "".join(c if c.isprintable() else " " for c in str(message))[:500]
+    print("IMCAM: " + safe_message, file=sys.stderr, flush=True)
 
 
 def check_runtime(server_hls=False):
