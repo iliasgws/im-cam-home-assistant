@@ -58,7 +58,7 @@ class ControlTests(unittest.IsolatedAsyncioTestCase):
     async def test_ptz_forward_sends_without_waiting_for_reply(self):
         ws = Socket()
         session = ControlSession(ws)
-        for direction, code in [('up',1),('down',2),('left',4),('right',3),('stop',0)]:
+        for direction, code in [('up',1),('down',2),('left',3),('right',4),('stop',0)]:
             await session.ptz('CAMERA', direction)
             message = ws.sent[-1]
             self.assertEqual(message['headers']['callee'], 'CAMERA')

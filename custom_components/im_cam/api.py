@@ -14,7 +14,7 @@ import uuid
 from .client_profile import APP_VERSION, BUNDLE_ID, OEM_VID, VID, VKEY
 
 DEFAULT_ENDPOINT = "wss://fast.jfgou.com:443/fast"
-DIRECTIONS = {"up": 1, "down": 2, "left": 4, "right": 3, "stop": 0}
+DIRECTIONS = {"up": 1, "down": 2, "left": 3, "right": 4, "stop": 0}
 _COMPLEX_PASSWORD = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d\W_]{6,64}$")
 
 
