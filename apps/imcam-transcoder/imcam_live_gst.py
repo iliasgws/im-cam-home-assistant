@@ -169,9 +169,9 @@ async def run(data):
             caps = pad.get_current_caps()
             if caps is None:
                 raise LiveViewError("Incoming media has no format.")
-            media = caps.get_structure(0).get_string("media")
+            media = caps.get_structure(0).get_value("media")
             if media == "video":
-                codec = caps.get_structure(0).get_string("encoding-name")
+                codec = caps.get_structure(0).get_value("encoding-name")
                 if codec != "H265":
                     raise LiveViewError("Camera returned an unsupported video codec.")
                 if server_hls:
