@@ -19,11 +19,19 @@ def media_for(coordinator):
 
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
+    media = media_for(coordinator)
+
+    def cameras(serial):
+        entities = [ImCamCamera(coordinator, serial, media)]
+        if coordinator.transcoding_enabled:
+            entities.append(ImCamTranscodedCamera(coordinator, serial, media))
+        return entities
+
     async_add_camera_entities(
         entry,
         coordinator,
         async_add_entities,
-        lambda serial: [ImCamCamera(coordinator, serial, media_for(coordinator))],
+        cameras,
     )
 
 
@@ -82,4 +90,55 @@ class ImCamCamera(ImCamEntity, Camera):
         for session_id, session in tuple(self._media._sessions.items()):
             if session.serial == self._serial:
                 await self._media.async_close_session(session_id)
+        await super().async_will_remove_from_hass()
+
+
+class ImCamTranscodedCamera(ImCamEntity, Camera):
+    """HLS camera entity whose H.265 input is converted to H.264 on the HAOS host."""
+
+    _attr_supported_features = CameraEntityFeature.STREAM
+    _attr_brand = "IM CAM"
+    _attr_model = "Camera (server transcoded)"
+    _attr_icon = "mdi:video-convert"
+
+    def __init__(self, coordinator, serial, media):
+        super().__init__(coordinator, serial)
+        Camera.__init__(self)
+        self._media = media
+        self._attr_unique_id = f"{serial}_transcoded_camera"
+        self._attr_name = "Server transcoded camera"
+
+    @property
+    def available(self):
+        # A failed HLS worker must not hide the player: reopening refreshes the
+        # companion session and lets the worker recover with a new source URL.
+        return (
+            self.coordinator.last_update_success
+            and bool(self.device)
+            and self.device.get("online") is not False
+            and self.device.get("privacy") is not True
+            and self.device.get("state") != STATE_UNAVAILABLE
+        )
+
+    async def async_refresh_providers(self, *, write_state=True):
+        """Use HA's HLS player for the companion app's video-only source."""
+        # Automatic WebRTC providers may try an audio backchannel or treat this
+        # short-lived HLS URL as a persistent RTSP source.
+
+    async def async_create_stream(self):
+        """Refresh expired companion sessions when HA reuses its stream worker."""
+        if self.stream:
+            source = await self.stream_source()
+            if source != self.stream.source:
+                # A replacement session starts HLS timestamps/sequence numbers
+                # again. Discard old output buffers along with the old worker.
+                await self.stream.stop()
+                self.stream = None
+        return await super().async_create_stream()
+
+    async def stream_source(self):
+        return await self._media.async_create_transcoded_stream(self._serial)
+
+    async def async_will_remove_from_hass(self):
+        await self._media.async_close_transcoded_stream(self._serial)
         await super().async_will_remove_from_hass()

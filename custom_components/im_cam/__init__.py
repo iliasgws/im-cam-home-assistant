@@ -12,7 +12,16 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import ImCamApi
-from .const import CONF_ACCOUNT, CONF_PASSWORD, DEFAULT_SCAN_INTERVAL, DOMAIN
+from .const import (
+    CONF_ACCOUNT,
+    CONF_ENABLE_TRANSCODING,
+    CONF_PASSWORD,
+    CONF_TRANSCODER_API_KEY,
+    CONF_TRANSCODER_URL,
+    DEFAULT_SCAN_INTERVAL,
+    DEFAULT_TRANSCODER_URL,
+    DOMAIN,
+)
 
 PLATFORMS = ["sensor", "switch", "button", "camera", "select"]
 _LOGGER = logging.getLogger(__name__)
@@ -47,6 +56,9 @@ class ImCamCoordinator(DataUpdateCoordinator):
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=DEFAULT_SCAN_INTERVAL)
         self.entry = entry
         self.api = ImCamApi(async_get_clientsession(hass), entry.data[CONF_ACCOUNT], entry.data[CONF_PASSWORD])
+        self.transcoding_enabled = entry.options.get(CONF_ENABLE_TRANSCODING, False)
+        self.transcoder_url = entry.options.get(CONF_TRANSCODER_URL, DEFAULT_TRANSCODER_URL).rstrip("/")
+        self.transcoder_api_key = entry.options.get(CONF_TRANSCODER_API_KEY, "")
         self._ptz_locks = {}
 
     def async_control_session(self):
@@ -61,6 +73,7 @@ class ImCamCoordinator(DataUpdateCoordinator):
             for session_id, session in tuple(media._sessions.items()):
                 if session.serial == serial:
                     await media.async_close_session(session_id)
+            await media.async_close_transcoded_stream(serial)
 
     async def _async_update_data(self):
         try:

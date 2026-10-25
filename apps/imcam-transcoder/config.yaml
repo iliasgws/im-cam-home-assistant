@@ -1,0 +1,15 @@
+name: IM CAM Transcoder
+slug: imcam-transcoder
+description: Decode IM CAM H.265 streams and serve H.264 HLS to Home Assistant
+version: "0.1.12"
+url: https://github.com/iliasgws/im-cam-home-assistant
+arch:
+  - amd64
+  - aarch64
+startup: services
+init: false
+watchdog: http://[HOST]:8787/health
+options:
+  api_key: ""
+schema:
+  api_key: str
