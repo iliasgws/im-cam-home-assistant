@@ -166,12 +166,21 @@ async def run(data):
 
     def on_pad(_, pad):
         try:
+            # webrtcbin can add unnegotiated sink pads as well as received RTP
+            # source pads; only attach a receiver branch to a source pad.
+            if pad.get_direction() != Gst.PadDirection.SRC:
+                return
             caps = pad.get_current_caps()
-            if caps is None:
-                raise LiveViewError("Incoming media has no format.")
-            media = caps.get_structure(0).get_value("media")
+            if caps is None or caps.get_size() == 0:
+                caps = pad.query_caps(None)
+            if caps is None or caps.get_size() == 0:
+                raise LiveViewError("Incoming RTP source pad has no negotiated format.")
+            structure = caps.get_structure(0)
+            if structure is None:
+                raise LiveViewError("Incoming RTP source format is unavailable.")
+            media = structure.get_value("media")
             if media == "video":
-                codec = caps.get_structure(0).get_value("encoding-name")
+                codec = structure.get_value("encoding-name")
                 if codec != "H265":
                     raise LiveViewError("Camera returned an unsupported video codec.")
                 if server_hls:
