@@ -6,6 +6,7 @@ import os
 import signal
 import sys
 import threading
+import traceback
 import uuid
 from urllib.parse import quote
 
@@ -216,7 +217,12 @@ async def run(data):
             if pad.link(branch.get_static_pad("sink")) != Gst.PadLinkReturn.OK:
                 raise LiveViewError("Could not connect incoming media to the viewer.")
         except Exception as error:
-            message = str(error) if isinstance(error, LiveViewError) else f"Video setup failed ({type(error).__name__})."
+            if isinstance(error, LiveViewError):
+                message = str(error)
+            else:
+                location = traceback.extract_tb(error.__traceback__)[-1]
+                attribute = f", missing {error.name}" if isinstance(error, AttributeError) else ""
+                message = f"Video setup failed ({type(error).__name__}{attribute}, line {location.lineno})."
             loop.call_soon_threadsafe(errors.put_nowait, message)
 
     rtc.connect("on-ice-candidate", on_candidate)
