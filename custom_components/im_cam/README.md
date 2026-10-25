@@ -23,7 +23,7 @@ Your account password is stored in the Home Assistant config entry and hashed in
 
 The optional **IM CAM Transcoder** app creates a second camera entity and converts the camera's H.265 video to H.264 on the Home Assistant host. This uses software encoding and can increase CPU load. It outputs video only; the original **Camera** entity remains available for direct WebRTC playback with camera audio.
 
-To try beta **0.4.0-beta.4**, install that prerelease of the integration through HACS and add the feature branch as the Apps repository. The branch-specific app hostname is `d4719374-imcam-transcoder`.
+To try beta **0.4.0-beta.5**, install that prerelease of the integration through HACS and add the feature branch as the Apps repository. The branch-specific app hostname is `d4719374-imcam-transcoder`.
 
 1. In **Settings → Apps**, open the three-dot menu, choose **Repositories**, and add `https://github.com/iliasgws/im-cam-home-assistant#feat/server-side-transcoding`.
 2. Install **IM CAM Transcoder**. In its configuration, set a random API key of at least 32 characters.
@@ -61,6 +61,6 @@ The tested camera protocol uses H.265 video and PCMU audio. A direct WebRTC brid
 
 The direct WebRTC path uses authenticated account/device authorization, service-provided STUN/TURN settings, and ephemeral signaling sessions. Session secrets and camera permits are kept in memory and are not entity attributes. Two-way talk and snapshot images are not implemented.
 
-The existing controls and direct signaling are covered by mocked protocol/lifecycle checks. The new transcoder app and HLS camera path have not yet been validated on Home Assistant OS against a real camera. The existing Linux CLI's camera verification does not establish behavior on every camera, HAOS device, or network.
+The existing controls and direct signaling are covered by mocked protocol/lifecycle checks. The transcoder app and HLS camera path were validated on an amd64 Home Assistant OS install with Home Assistant Core 2026.8.2 and a real camera: browser playback worked at 640×360 SD and switched live to 1280×720 HD. The existing Linux CLI's camera verification does not establish behavior on every camera, HAOS device, or network.
 
 The native asynchronous WebRTC camera API used here requires Home Assistant **2024.12.0 or newer**.

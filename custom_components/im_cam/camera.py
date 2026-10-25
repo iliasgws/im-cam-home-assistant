@@ -121,6 +121,14 @@ class ImCamTranscodedCamera(ImCamEntity, Camera):
         # Automatic WebRTC providers may try an audio backchannel or treat this
         # short-lived HLS URL as a persistent RTSP source.
 
+    async def async_create_stream(self):
+        """Refresh expired companion sessions when HA reuses its stream worker."""
+        if self.stream:
+            source = await self.stream_source()
+            if source != self.stream.source:
+                self.stream.update_source(source)
+        return await super().async_create_stream()
+
     async def stream_source(self):
         return await self._media.async_create_transcoded_stream(self._serial)
 
