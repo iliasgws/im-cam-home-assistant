@@ -258,6 +258,7 @@ async def async_main():
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     try:
         asyncio.run(async_main())
     except KeyboardInterrupt:
