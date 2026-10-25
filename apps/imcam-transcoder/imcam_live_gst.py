@@ -230,7 +230,7 @@ async def run(data):
                 message = str(error)
             else:
                 location = traceback.extract_tb(error.__traceback__)[-1]
-                attribute = f", missing {error.name}" if isinstance(error, AttributeError) else ""
+                attribute = f", missing {error.name} on {type(error.obj).__name__}" if isinstance(error, AttributeError) else ""
                 message = f"Video setup failed ({type(error).__name__}{attribute}, line {location.lineno})."
             loop.call_soon_threadsafe(errors.put_nowait, message)
 
