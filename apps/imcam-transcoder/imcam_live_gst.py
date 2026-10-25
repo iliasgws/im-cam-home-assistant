@@ -202,7 +202,7 @@ async def run(data):
                         "mpegtsmux ! hlssink "
                         f"location={hls_dir}/segment%05d.ts "
                         f"playlist-location={hls_dir}/index.m3u8 "
-                        "target-duration=2 playlist-length=4 max-files=6 sync=false", True,
+                        "target-duration=2 playlist-length=4 max-files=6", True,
                     )
                     transcoder_elements["caps"] = branch.get_by_name("outputcaps")
                     transcoder_elements["encoder"] = branch.get_by_name("transcode")
