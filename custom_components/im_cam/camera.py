@@ -110,8 +110,12 @@ class ImCamTranscodedCamera(ImCamEntity, Camera):
 
     @property
     def available(self):
+        # A failed HLS worker must not hide the player: reopening refreshes the
+        # companion session and lets the worker recover with a new source URL.
         return (
-            super().available
+            self.coordinator.last_update_success
+            and bool(self.device)
+            and self.device.get("online") is not False
             and self.device.get("privacy") is not True
             and self.device.get("state") != STATE_UNAVAILABLE
         )
