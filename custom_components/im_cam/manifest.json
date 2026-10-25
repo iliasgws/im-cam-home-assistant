@@ -8,5 +8,5 @@
   "documentation": "https://github.com/iliasgws/im-cam-home-assistant",
   "issue_tracker": "https://github.com/iliasgws/im-cam-home-assistant/issues",
   "iot_class": "cloud_polling",
-  "version": "0.4.0-beta.3"
+  "version": "0.4.0-beta.4"
 }

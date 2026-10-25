@@ -116,6 +116,11 @@ class ImCamTranscodedCamera(ImCamEntity, Camera):
             and self.device.get("state") != STATE_UNAVAILABLE
         )
 
+    async def async_refresh_providers(self, *, write_state=True):
+        """Use HA's HLS player for the companion app's video-only source."""
+        # Automatic WebRTC providers may try an audio backchannel or treat this
+        # short-lived HLS URL as a persistent RTSP source.
+
     async def stream_source(self):
         return await self._media.async_create_transcoded_stream(self._serial)
 
