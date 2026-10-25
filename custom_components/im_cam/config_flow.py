@@ -37,13 +37,10 @@ class ImCamConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
-        return ImCamOptionsFlow(config_entry)
+        return ImCamOptionsFlow()
 
 
 class ImCamOptionsFlow(config_entries.OptionsFlow):
-    def __init__(self, config_entry):
-        self.config_entry = config_entry
-
     async def async_step_init(self, user_input=None) -> FlowResult:
         if user_input is not None:
             errors = {}
