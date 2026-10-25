@@ -78,16 +78,22 @@ async def run(data):
     controls_queue = asyncio.Queue()
 
     async def read_controls():
-        while True:
-            line = await asyncio.to_thread(sys.stdin.readline)
-            if not line:
-                return
-            try:
-                command = json.loads(line)
-            except (ValueError, TypeError):
-                continue
-            if isinstance(command, dict):
-                await controls_queue.put(command)
+        # A blocking executor readline survives task cancellation and prevents
+        # asyncio.run from reporting negotiation errors until stdin closes.
+        reader = asyncio.StreamReader()
+        transport, _ = await loop.connect_read_pipe(
+            lambda: asyncio.StreamReaderProtocol(reader), sys.stdin
+        )
+        try:
+            while line := await reader.readline():
+                try:
+                    command = json.loads(line)
+                except (ValueError, TypeError):
+                    continue
+                if isinstance(command, dict):
+                    await controls_queue.put(command)
+        finally:
+            transport.close()
 
     control_reader = asyncio.create_task(read_controls()) if server_hls else None
     main = GLib.MainLoop()
