@@ -2,6 +2,7 @@ FROM debian:trixie-slim
 
 RUN apt-get update \
     && apt-get install --no-install-recommends -y \
+        ca-certificates \
         gir1.2-gst-plugins-bad-1.0 \
         gir1.2-gst-plugins-base-1.0 \
         gstreamer1.0-libav \
