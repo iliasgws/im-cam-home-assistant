@@ -130,7 +130,10 @@ class ImCamTranscodedCamera(ImCamEntity, Camera):
         if self.stream:
             source = await self.stream_source()
             if source != self.stream.source:
-                self.stream.update_source(source)
+                # A replacement session starts HLS timestamps/sequence numbers
+                # again. Discard old output buffers along with the old worker.
+                await self.stream.stop()
+                self.stream = None
         return await super().async_create_stream()
 
     async def stream_source(self):
