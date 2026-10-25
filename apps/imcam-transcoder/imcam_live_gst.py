@@ -8,6 +8,7 @@ import sys
 import threading
 import traceback
 import uuid
+from contextlib import nullcontext
 from urllib.parse import quote
 
 import gi
@@ -23,6 +24,16 @@ REQUIRED_ELEMENTS = ("webrtcbin", "nicesrc", "dtlssrtpdec", "rtph265depay", "avd
 
 class LiveViewError(Exception):
     pass
+
+
+def caps_fields(caps, *fields):
+    """Read fields with both ordinary Gst.Structure and 1.26 wrappers."""
+    result = caps.get_structure(0)
+    context = result if hasattr(result, "__enter__") else nullcontext(result)
+    with context as structure:
+        if structure is None:
+            raise LiveViewError("Incoming media format is unavailable.")
+        return tuple(structure.get_value(field) for field in fields)
 
 
 def say(message):
@@ -145,8 +156,7 @@ async def run(data):
         frame_count[0] += 1
         # Gst.Structure is borrowed from Caps: retain both wrappers.
         caps = sample.get_caps()
-        structure = caps.get_structure(0)
-        width, height = structure.get_value("width"), structure.get_value("height")
+        width, height = caps_fields(caps, "width", "height")
         if frame_count[0] == 1:
             loop.call_soon_threadsafe(first_frame.set)
             say(f"Video frames received ({width}x{height}). Close the video window or press Ctrl-C to stop.")
@@ -175,12 +185,8 @@ async def run(data):
                 caps = pad.query_caps(None)
             if caps is None or caps.get_size() == 0:
                 raise LiveViewError("Incoming RTP source pad has no negotiated format.")
-            structure = caps.get_structure(0)
-            if structure is None:
-                raise LiveViewError("Incoming RTP source format is unavailable.")
-            media = structure.get_value("media")
+            media, codec = caps_fields(caps, "media", "encoding-name")
             if media == "video":
-                codec = structure.get_value("encoding-name")
                 if codec != "H265":
                     raise LiveViewError("Camera returned an unsupported video codec.")
                 if server_hls:
