@@ -1,5 +1,4 @@
-ARG BUILD_FROM
-FROM ${BUILD_FROM}
+FROM debian:trixie-slim
 
 RUN apt-get update \
     && apt-get install --no-install-recommends -y \
