@@ -61,6 +61,6 @@ The tested camera protocol uses H.265 video and PCMU audio. A direct WebRTC brid
 
 The direct WebRTC path uses authenticated account/device authorization, service-provided STUN/TURN settings, and ephemeral signaling sessions. Session secrets and camera permits are kept in memory and are not entity attributes. Two-way talk and snapshot images are not implemented.
 
-The existing controls and direct signaling are covered by mocked protocol/lifecycle checks. The transcoder app and HLS camera path were validated on an amd64 Home Assistant OS install with Home Assistant Core 2026.8.2 and a real camera: browser playback worked at 640×360 SD and switched live to 1280×720 HD. The existing Linux CLI's camera verification does not establish behavior on every camera, HAOS device, or network.
+The existing controls and direct signaling are covered by mocked protocol/lifecycle checks. The transcoder app and HLS camera path were validated on an amd64 Home Assistant OS install with Home Assistant Core 2026.8.2 and a real camera: browser playback worked at 640×360 SD and 1280×720 HD. Reopening after a companion App restart resumed video without reloading the integration. Changing resolution during an active HLS session can stall the player; close and reopen it after selecting a different quality. The existing Linux CLI's camera verification does not establish behavior on every camera, HAOS device, or network.
 
 The native asynchronous WebRTC camera API used here requires Home Assistant **2024.12.0 or newer**.
